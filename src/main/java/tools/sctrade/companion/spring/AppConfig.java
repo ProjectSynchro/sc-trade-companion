@@ -28,6 +28,7 @@ import tools.sctrade.companion.domain.gamelog.lineprocessors.OldLogLineProcessor
 import tools.sctrade.companion.domain.image.ImageManipulation;
 import tools.sctrade.companion.domain.image.ImageWriter;
 import tools.sctrade.companion.domain.image.manipulations.AlignToTemplate;
+import tools.sctrade.companion.domain.image.manipulations.CropToCenter;
 import tools.sctrade.companion.domain.image.manipulations.UpscaleTo4k;
 import tools.sctrade.companion.domain.notification.NotificationRepository;
 import tools.sctrade.companion.domain.notification.NotificationService;
@@ -190,6 +191,7 @@ public class AppConfig {
       ImageWriter<Optional<Path>> imageWriter, SoundUtil soundPlayer,
       NotificationService notificationService, SettingRepository settings) {
     List<ImageManipulation> postprocessingManipulations = new ArrayList<>();
+    postprocessingManipulations.add(new CropToCenter(16, 9));
     postprocessingManipulations.add(new UpscaleTo4k());
 
     return new ScreenPrinter(Arrays.asList(commodityService), postprocessingManipulations,
