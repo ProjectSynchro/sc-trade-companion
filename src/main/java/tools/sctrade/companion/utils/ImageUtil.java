@@ -49,6 +49,69 @@ import tools.sctrade.companion.exceptions.RectangleOutOfBoundsException;
 public class ImageUtil {
   private static final Logger logger = LoggerFactory.getLogger(ImageUtil.class);
 
+  static {
+    loadOpenCv();
+  }
+
+  /**
+   * Loads the OpenCV native library. Tries the system-installed library first (e.g. from
+   * {@code opencv-java} package on Linux) by scanning the library path for any
+   * {@code libopencv_java4*.so}, then falls back to the bundled version from
+   * {@code org.openpnp:opencv}.
+   */
+  private static void loadOpenCv() {
+    String systemLib = findSystemOpenCv();
+    if (systemLib != null) {
+      try {
+        System.loadLibrary(systemLib);
+        logger.info("Loaded system OpenCV library: {}", systemLib);
+        return;
+      } catch (UnsatisfiedLinkError e) {
+        logger.warn("Found system OpenCV '{}' but failed to load it", systemLib, e);
+      }
+    }
+
+    logger.info("No system OpenCV found, loading bundled version");
+    OpenCV.loadLocally();
+  }
+
+  /**
+   * Scans the system library paths for any {@code libopencv_java4*.so} or {@code opencv_java4*.dll}
+   * and returns the library name (without prefix/suffix) suitable for
+   * {@link System#loadLibrary(String)}.
+   */
+  private static String findSystemOpenCv() {
+    String libraryPath = System.getProperty("java.library.path", "");
+    boolean isWindows = System.getProperty("os.name", "").toLowerCase().contains("win");
+    String prefix = isWindows ? "" : "lib";
+    String suffix = isWindows ? ".dll" : ".so";
+
+    for (String dir : libraryPath.split(java.io.File.pathSeparator)) {
+      java.io.File dirFile = new java.io.File(dir);
+      if (!dirFile.isDirectory()) {
+        continue;
+      }
+
+      String[] matches = dirFile
+          .list((d, name) -> name.startsWith(prefix + "opencv_java4") && name.endsWith(suffix));
+      if (matches != null && matches.length > 0) {
+        // Strip prefix and suffix to get the library name.
+        String fileName = matches[0];
+        String libName = fileName;
+        if (!prefix.isEmpty() && libName.startsWith(prefix)) {
+          libName = libName.substring(prefix.length());
+        }
+        if (libName.endsWith(suffix)) {
+          libName = libName.substring(0, libName.length() - suffix.length());
+        }
+        logger.debug("Found system OpenCV: {} in {}", libName, dir);
+        return libName;
+      }
+    }
+
+    return null;
+  }
+
   private ImageUtil() {}
 
   /**
@@ -60,7 +123,7 @@ public class ImageUtil {
    */
   public static BufferedImage makeHistogramEqualizedGreyscaleCopy(BufferedImage image) {
     image = makeGreyscaleCopy(image);
-    OpenCV.loadShared();
+
 
     try {
       Mat original = toMat(image);
@@ -82,7 +145,7 @@ public class ImageUtil {
    */
   public static BufferedImage makeClaheEqualizedGreyscaleCopy(BufferedImage image) {
     image = makeGreyscaleCopy(image);
-    OpenCV.loadShared();
+
 
     try {
       Mat original = toMat(image);
@@ -292,7 +355,7 @@ public class ImageUtil {
    */
   public static BufferedImage applyGaussianBlur(BufferedImage image, int pixelNeighborhoodSize,
       int substractedConstant) {
-    OpenCV.loadShared();
+
 
     try {
       Mat original = toMat(image);
@@ -319,7 +382,7 @@ public class ImageUtil {
    */
   public static BufferedImage applyAdaptiveGaussianThreshold(BufferedImage image,
       int pixelNeighborhoodSize, int substractedConstant) {
-    OpenCV.loadShared();
+
 
     try {
       Mat original = toMat(image);
@@ -343,7 +406,7 @@ public class ImageUtil {
    *      "https://docs.opencv.org/4.x/d7/d4d/tutorial_py_thresholding.html#autotoc_md1426">Documentation</a>
    */
   public static BufferedImage applyOtsuBinarization(BufferedImage image) {
-    OpenCV.loadShared();
+
 
     try {
       Mat original = toMat(image);
@@ -368,7 +431,7 @@ public class ImageUtil {
    *      "https://docs.opencv.org/4.x/dd/d49/tutorial_py_contour_features.html#autotoc_md1308">Documentation</a>
    */
   public static List<Rectangle> findBoundingBoxes(BufferedImage image) {
-    OpenCV.loadShared();
+
 
     try {
       Mat original = toMat(image);
@@ -485,7 +548,7 @@ public class ImageUtil {
    */
   public static BufferedImage alignToReferenceWithValidation(BufferedImage imageToAlign,
       BufferedImage referenceImage, double minSimilarityThreshold) {
-    OpenCV.loadShared();
+
 
     Mat refMat = null;
     Mat imgMat = null;
@@ -647,7 +710,7 @@ public class ImageUtil {
    */
   public static double calculateImageSimilarity(BufferedImage sourceImage,
       BufferedImage targetImage) {
-    OpenCV.loadShared();
+
 
     Mat sourceMat = null;
     Mat targetMat = null;
