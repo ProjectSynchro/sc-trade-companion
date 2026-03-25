@@ -49,6 +49,10 @@ import tools.sctrade.companion.exceptions.RectangleOutOfBoundsException;
 public class ImageUtil {
   private static final Logger logger = LoggerFactory.getLogger(ImageUtil.class);
 
+  static {
+    OpenCV.loadLocally();
+  }
+
   private ImageUtil() {}
 
   /**
@@ -60,7 +64,7 @@ public class ImageUtil {
    */
   public static BufferedImage makeHistogramEqualizedGreyscaleCopy(BufferedImage image) {
     image = makeGreyscaleCopy(image);
-    OpenCV.loadShared();
+
 
     try {
       Mat original = toMat(image);
@@ -82,7 +86,7 @@ public class ImageUtil {
    */
   public static BufferedImage makeClaheEqualizedGreyscaleCopy(BufferedImage image) {
     image = makeGreyscaleCopy(image);
-    OpenCV.loadShared();
+
 
     try {
       Mat original = toMat(image);
@@ -292,7 +296,7 @@ public class ImageUtil {
    */
   public static BufferedImage applyGaussianBlur(BufferedImage image, int pixelNeighborhoodSize,
       int substractedConstant) {
-    OpenCV.loadShared();
+
 
     try {
       Mat original = toMat(image);
@@ -319,7 +323,7 @@ public class ImageUtil {
    */
   public static BufferedImage applyAdaptiveGaussianThreshold(BufferedImage image,
       int pixelNeighborhoodSize, int substractedConstant) {
-    OpenCV.loadShared();
+
 
     try {
       Mat original = toMat(image);
@@ -343,7 +347,7 @@ public class ImageUtil {
    *      "https://docs.opencv.org/4.x/d7/d4d/tutorial_py_thresholding.html#autotoc_md1426">Documentation</a>
    */
   public static BufferedImage applyOtsuBinarization(BufferedImage image) {
-    OpenCV.loadShared();
+
 
     try {
       Mat original = toMat(image);
@@ -368,7 +372,7 @@ public class ImageUtil {
    *      "https://docs.opencv.org/4.x/dd/d49/tutorial_py_contour_features.html#autotoc_md1308">Documentation</a>
    */
   public static List<Rectangle> findBoundingBoxes(BufferedImage image) {
-    OpenCV.loadShared();
+
 
     try {
       Mat original = toMat(image);
@@ -485,7 +489,7 @@ public class ImageUtil {
    */
   public static BufferedImage alignToReferenceWithValidation(BufferedImage imageToAlign,
       BufferedImage referenceImage, double minSimilarityThreshold) {
-    OpenCV.loadShared();
+
 
     Mat refMat = null;
     Mat imgMat = null;
@@ -647,7 +651,7 @@ public class ImageUtil {
    */
   public static double calculateImageSimilarity(BufferedImage sourceImage,
       BufferedImage targetImage) {
-    OpenCV.loadShared();
+
 
     Mat sourceMat = null;
     Mat targetMat = null;
